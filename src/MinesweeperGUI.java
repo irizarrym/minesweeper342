@@ -9,12 +9,32 @@
     GUI Class
 */
 
+/*
+    Game >>
+        Reset
+        Top ten
+        eXit
+
+    Help >>
+        Help
+        About
+*/
+
 import java.awt.*;
+import java.awt.event.*;
 import javax.swing.*;
 
-public class MinesweeperGUI extends JFrame implements iMinesweeper
+public class MinesweeperGui extends JFrame implements iMinesweeper
 {
-    public MinesweeperGUI()
+    /**********************
+     * Instance Variables * 
+     **********************/
+    
+    private MinesweeperGame game;
+    private HighScores topTen;
+    private GridIcon[][] gameMatrix;
+    
+    public MinesweeperGui()
     {
         // Basic GUI Initialization and Configuration
         super("Minesweeper");
@@ -23,14 +43,15 @@ public class MinesweeperGUI extends JFrame implements iMinesweeper
         
         getContentPane().setLayout(new BorderLayout());
         
-        GridLayout grid = new GridLayout();
-        
-        // Initialize grid of buttons
+        // Initialize grid of icons
+        gameMatrix = new GridIcon[10][];
         for(int x = 0; x < 10; ++x)
         {
+            gameMatrix[x] = new GridIcon[10];
             for(int y = 0; y < 10; ++y)
             {
-                GridButton b = new GridButton(x, y);
+                GridIcon b = new GridIcon(img.NORMAL, x, y);
+                gameMatrix[x][y] = b;
             }
         }
         
@@ -43,29 +64,85 @@ public class MinesweeperGUI extends JFrame implements iMinesweeper
     
     
     
-    /********************
-     * Extended Classes *
-     ********************/
+    /******************************
+     * iMinesepper Implementation *
+     ******************************/
     
-    private class GridButton extends JButton
+    // Set cell at @x, @y to @state
+    @Override
+    public void setCell(int x, int y, String state)
     {
-        public int gridX, gridY;
         
-        GridButton(int x, int y)
-        {
-            super();
-            gridX = x;
-            gridY = y;
-        }
+    }
+    
+    // Player won the game (cleared all cells not containing mines)
+    @Override
+    public void gameWin()
+    {
+        
+    }
+    
+    // Player lost the game (clicked on a mine)
+    @Override
+    public void gameLose()
+    {
+        
     }
     
     
     
-    /*********************
-     * Private Variables *
-     *********************/
+    /********************
+     * Extended Classes *
+     ********************/
     
-    MinesweeperGame game;
+    private class GridIcon extends ImageIcon implements MouseListener
+    {
+        // Instance Variables
+        public final int cellX, cellY;
+        private String state;
+        
+        // Constructor
+        GridIcon(String path, int x, int y)
+        {
+            super(path);
+            addMouseListener(this);
+            
+            cellX = x;
+            cellY = y;
+            setState(GuiState.Blank);
+        }
+        
+        // Set state of icon
+        void setState(String s)
+        {
+            switch(s)
+            {
+                default:
+                    state = s;
+            }
+        }
+        
+        
+        
+        /********************************
+         * MouseListener Implementation *
+         ********************************/
+        
+        @Override
+        public void mouseClicked(MouseEvent e)
+        {
+            game.clickCell(cellX, cellY);
+        }
+        
+        @Override
+        public void mousePressed(MouseEvent e){ }
+        @Override
+        public void mouseReleased(MouseEvent e){ }
+        @Override
+        public void mouseEntered(MouseEvent e){ }
+        @Override
+        public void mouseExited(MouseEvent e){ }
+    }
     
     
     
@@ -89,7 +166,7 @@ public class MinesweeperGUI extends JFrame implements iMinesweeper
         "./img/countdown_8.gif", "./img/countdown_9.gif"
     };
     
-    private static class img
+    private static final class img
     {
         private static final String
         BOMB_BLOWN = "./img/button_bomb_blown.gif",
@@ -105,5 +182,14 @@ public class MinesweeperGUI extends JFrame implements iMinesweeper
         HEAD_O = "./img/head_o.gif",
         SMILE = "./img/smile_button.gif",
         SMILE_PRESSED = "./img/smile_button_pressed.gif";
+    }
+    
+    
+    
+    private class GuiState extends CellState
+    {
+        public static final String
+        MarkMine        = "M",
+        MarkQuestion    = "?";
     }
 }

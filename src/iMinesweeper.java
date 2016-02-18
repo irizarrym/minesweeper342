@@ -6,10 +6,17 @@
     CS 342 - Project 2
     Minesweeper
 
-    Interface which game backend calls into to update GUI
+    Interface which allows game backend to update GUI
 */
 
 public interface iMinesweeper
 {
+    // Set cell at x, y
+    void setCell(int x, int y, String state);
     
+    // Player successfully cleared all non-mine cells
+    void gameWin();
+    
+    // Player failed (clicked on a mine)
+    void gameLose();
 }
