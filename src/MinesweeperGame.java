@@ -41,7 +41,9 @@ public class MinesweeperGame
     // User clicks cell at x, y
     public void clickCell(int x, int y)
     {
-        
+        gui.setCell(x, y, CellState.Num0);
+        // gui.gameWin();
+        // gui.gameLose();
     }
 }
 
@@ -51,7 +53,6 @@ class CellState
     Blank   = " ",
     Mine    = "*",
     Explode = "E",
-    Pressed = "0",
     Num0    = "0",
     Num1    = "1",
     Num2    = "2",
