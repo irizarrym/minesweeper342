@@ -14,6 +14,9 @@ public interface iMinesweeper
     // Set cell at x, y
     void setCell(int x, int y, String state);
     
+        // Get Cell Status at x, y
+	String getCell(int x, int y);
+	
     // Player successfully cleared all non-mine cells
     void gameWin();
     
