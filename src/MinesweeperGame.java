@@ -29,6 +29,8 @@ public class MinesweeperGame
     // Start a new game
     public void newGame()
     {
+    	Random r1 = new Random();
+    	
         for(int x = 0; x < 10; ++x)
         {
             for(int y = 0; y < 10; ++y)
@@ -36,6 +38,15 @@ public class MinesweeperGame
                 gui.setCell(x, y, CellState.Blank);
             }
         }
+        
+        for(int i=0; i<9; i++){
+         int a = r1.nextInt(9);
+         int b = r1.nextInt(9);
+         if (gui.getCell(a,b) !="*") gui.setCell(a,b, CellState.Mine);
+         else i--; //do it again
+        }
+        
+        
     }
     
     // User clicks cell at x, y
