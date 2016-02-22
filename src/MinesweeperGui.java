@@ -104,6 +104,14 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
             Logger.getLogger(MinesweeperGui.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    // Return value of @x, @y 
+     public String getCell(int x, int y){
+    	try {
+    	return gameMatrix[x][y].state;
+    	} catch (Exception ex){
+            Logger.getLogger(MinesweeperGui.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     
     // Player won the game (cleared all cells not containing mines)
     @Override
