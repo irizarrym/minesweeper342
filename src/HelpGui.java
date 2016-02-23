@@ -21,8 +21,8 @@ public class HelpGui extends JFrame
         super("Minesweeper Help/About");
         // Help/About drop down
         setLayout(new GridLayout(1,2));
-        JButton Help = new JButton("HeLp");
-        JButton About = new JButton("Exit");
+        JButton Help = new JButton("Help");
+        JButton About = new JButton("About");
         
         Help.addActionListener(new ActionListener() {
 
