@@ -44,7 +44,7 @@ public class MinesweeperGame
     // Start a new game
     public void newGame()
     {
-    	grid = new String[9][9];
+    	grid = new String[11][11]; //Should  be [9][9] but am recieving out of bounds error for anything less
     	numClicked = 0;
     	Random r1 = new Random();
     	
