@@ -30,15 +30,23 @@ import javax.swing.*;
 public class MinesweeperGui extends JFrame implements iMinesweeper
 {
     /**********************
-     * Instance Variables * 
+     * Instance Variables *
      **********************/
     
     private MinesweeperGame game;
     private HighScores topTen;
-    private GridLabel[][] gameMatrix;
+    private GridIcon[][] gameGrid;
     private JPanel gridPanel;
     private Icon[] iconNumber;
     private Icon[] iconCounter;
+    private boolean gameActive;
+    private GuiTimer timerPanel;
+    
+    
+    
+    /***************
+     * Constructor *
+     ***************/
     
     public MinesweeperGui() throws Exception
     {
@@ -65,22 +73,27 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
         gridPanel = new JPanel();
         gridPanel.setLayout(new GridLayout(10, 10));
         
-        gameMatrix = new GridLabel[10][10];
+        gameGrid = new GridIcon[10][10];
         for(int y = 0; y < 10; ++y)
         {
             for(int x = 0; x < 10; ++x)
             {
-                GridLabel b = new GridLabel(iconOther.NORMAL, x, y);
+                GridIcon b = new GridIcon(iconOther.NORMAL, x, y);
                 assert(b != null);
-                gameMatrix[x][y] = b;
+                gameGrid[x][y] = b;
                 gridPanel.add(b);
             }
         }
         
         super.add(gridPanel, BorderLayout.CENTER);
         
+        // Initialize top panel
+        timerPanel = new GuiTimer();
+        super.add(timerPanel, BorderLayout.NORTH);
+        
         // Initialize game backend
         game = new MinesweeperGame(this);
+        startNewGame();
         
         // Display GUI
         super.pack();
@@ -90,16 +103,29 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
     
     
     
+    /*****************
+     * GUI Functions *
+     *****************/
+    
+    // Start a new game
+    void startNewGame()
+    {
+        gameActive = true;
+        game.newGame();
+    }
+    
+    
+    
     /******************************
      * iMinesepper Implementation *
      ******************************/
     
-    // Set cell at @x, @y to @state
+    // Set cell at (@x, @y) to @state
     @Override
     public void setCell(int x, int y, String state)
     {
         try {
-            gameMatrix[x][y].setState(state);
+            gameGrid[x][y].setState(state);
         } catch (Exception ex) {
             Logger.getLogger(MinesweeperGui.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -109,14 +135,20 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
     @Override
     public void gameWin()
     {
+        gameActive = false;
+        timerPanel.stopTimer();
+        JOptionPane.showMessageDialog(this, "You win!");
         
+        //@@ Insert code for high score
     }
     
     // Player lost the game (clicked on a mine)
     @Override
     public void gameLose()
     {
-        
+        gameActive = false;
+        timerPanel.stopTimer();
+        JOptionPane.showMessageDialog(this, "You lose!");
     }
     
     
@@ -125,16 +157,17 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
      * Extended Classes *
      ********************/
     
-    private class GridLabel extends JLabel implements MouseListener
+    private class GridIcon extends JLabel implements MouseListener
     {
         // Instance Variables
         public final int cellX, cellY;
         private String state;
         
         // Constructor
-        GridLabel(Icon icon, int x, int y) throws Exception
+        GridIcon(Icon icon, int x, int y) throws Exception
         {
-            super("", icon, JLabel.CENTER);
+            // super("", icon, JLabel.CENTER);
+            super(icon);
             super.setSize(icon.getIconWidth(), icon.getIconHeight());
             super.addMouseListener(this);
             
@@ -194,6 +227,9 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
         @Override
         public void mouseClicked(MouseEvent e)
         {
+            // Game is not active so do nothing
+            if(!gameActive) return;
+            
             // Player left clicks on cell
             if(e.getButton() == MouseEvent.BUTTON1)
             {
@@ -203,16 +239,17 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
                     return;
                 }
                 
-                game.clickCell(cellX, cellY);
-                
-                try
+                if(state.equals(GuiState.Blank) || state.equals(GuiState.Pressed))
                 {
                     game.clickCell(cellX, cellY);
+                    timerPanel.startTimer();
                 }
-                catch(Exception ex)
-                {
-                    Logger.getLogger(MinesweeperGui.class.getName()).log(Level.SEVERE, null, ex);
-                }
+            }
+            
+            // Player middle clicks on cell (used for debugging purposes)
+            if(e.getButton() == MouseEvent.BUTTON2)
+            {
+                startNewGame();
             }
             
             // Player right clicks on cell
@@ -245,6 +282,9 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
         @Override
         public void mousePressed(MouseEvent e)
         {
+            // Game is not active so do nothing
+            if(!gameActive) return;
+            
             // Player is holding down left button on blank cell
             if(e.getButton() == MouseEvent.BUTTON1 && state.equals(GuiState.Blank))
             {
@@ -273,13 +313,11 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
         @Override
         public void mouseEntered(MouseEvent e)
         {
-            
         }
         
         @Override
         public void mouseExited(MouseEvent e)
         {
-            
         }
     }
     
