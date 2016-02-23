@@ -57,8 +57,8 @@ public class MinesweeperGame
         }
         
         for(int i=0; i<9; i++){				//Initialize bombs//
-         int a = r1.nextInt(9);
-         int b = r1.nextInt(9);
+         int a = r1.nextInt(10);
+         int b = r1.nextInt(10);
          if(grid[a][b] != "*") grid[a][b]="*";
          else i--; //do it again
         }
