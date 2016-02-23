@@ -9,17 +9,6 @@
     GUI Class
 */
 
-/*
-    Game >>
-        Reset
-        Top ten
-        eXit
-
-    Help >>
-        Help
-        About
-*/
-
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
@@ -37,10 +26,14 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
     private HighScores topTen;
     private GridIcon[][] gameGrid;
     private JPanel gridPanel;
+    private JPanel topPanel;
     private Icon[] iconNumber;
     private Icon[] iconCounter;
     private boolean gameActive;
+    private GameMenu menu;
     private GuiTimer timerPanel;
+    private GuiCounter bombCounter;
+    private ButtonSmiley smiley;
     
     
     
@@ -88,8 +81,25 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
         super.add(gridPanel, BorderLayout.CENTER);
         
         // Initialize top panel
+        topPanel = new JPanel();
+        topPanel.setLayout(new GridLayout(1, 4, 0, 0));
+        super.add(topPanel, BorderLayout.NORTH);
+        
+        // Intialize menu bar
+        menu = new GameMenu();
+        topPanel.add(menu.getMenu());
+        
+        // Initialize bomb counter
+        bombCounter = new GuiCounter(3);
+        topPanel.add(bombCounter);
+        
+        // Initialize smiley button
+        smiley = new ButtonSmiley();
+        topPanel.add(smiley);
+        
+        // Initialize timer panel
         timerPanel = new GuiTimer();
-        super.add(timerPanel, BorderLayout.NORTH);
+        topPanel.add(timerPanel);
         
         // Initialize game backend
         game = new MinesweeperGame(this);
@@ -112,6 +122,9 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
     {
         gameActive = true;
         game.newGame();
+        timerPanel.resetTimer();
+        smiley.setIcon(iconOther.SMILE);
+        bombCounter.setValue(10);
     }
     
     
@@ -137,7 +150,8 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
     {
         gameActive = false;
         timerPanel.stopTimer();
-        JOptionPane.showMessageDialog(this, "You win!");
+        int time = timerPanel.getValue();
+        smiley.setIcon(iconOther.HEAD_GLASSES);
         
         //@@ Insert code for high score
     }
@@ -148,14 +162,14 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
     {
         gameActive = false;
         timerPanel.stopTimer();
-        JOptionPane.showMessageDialog(this, "You lose!");
+        smiley.setIcon(iconOther.HEAD_DEAD);
     }
     
     
     
-    /********************
-     * Extended Classes *
-     ********************/
+    /***************
+     * Sub-Classes *
+     ***************/
     
     private class GridIcon extends JLabel implements MouseListener
     {
@@ -227,6 +241,12 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
         @Override
         public void mouseClicked(MouseEvent e)
         {
+            // Player middle clicks on cell (used for debugging purposes)
+            if(e.getButton() == MouseEvent.BUTTON2)
+            {
+                startNewGame();
+            }
+            
             // Game is not active so do nothing
             if(!gameActive) return;
             
@@ -241,15 +261,9 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
                 
                 if(state.equals(GuiState.Blank) || state.equals(GuiState.Pressed))
                 {
-                    game.clickCell(cellX, cellY);
                     timerPanel.startTimer();
+                    game.clickCell(cellX, cellY);
                 }
-            }
-            
-            // Player middle clicks on cell (used for debugging purposes)
-            if(e.getButton() == MouseEvent.BUTTON2)
-            {
-                startNewGame();
             }
             
             // Player right clicks on cell
@@ -261,9 +275,11 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
                     {
                         case GuiState.Blank:
                             setState(GuiState.MarkMine);
+                            bombCounter.decrement();
                             break;
 
                         case GuiState.MarkMine:
+                            bombCounter.increment();
                             setState(GuiState.MarkQuestion);
                             break;
 
@@ -290,6 +306,7 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
             {
                 try {
                     setState(GuiState.Pressed);
+                    smiley.setIcon(iconOther.HEAD_O);
                 } catch (Exception ex) {
                     Logger.getLogger(MinesweeperGui.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -304,6 +321,7 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
             {
                 try {
                     setState(GuiState.Blank);
+                    smiley.setIcon(iconOther.SMILE);
                 } catch (Exception ex) {
                     Logger.getLogger(MinesweeperGui.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -315,6 +333,120 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
         {
         }
         
+        @Override
+        public void mouseExited(MouseEvent e)
+        {
+        }
+    }
+    
+    
+    
+    private class GameMenu implements ActionListener
+    {
+        private JMenuBar menuBar;
+        private JMenu menuGame;
+        private JMenuItem menuReset;
+        private JMenuItem menuTopTen;
+        private JMenuItem menuExit;
+        private JMenu menuHelp;
+        private JMenuItem menuHelpHelp;
+        private JMenuItem menuAbout;
+        
+        public GameMenu()
+        {
+            // Initialize menus and items
+            menuBar = new JMenuBar();
+            menuGame = new JMenu("Game");
+            menuReset = new JMenuItem("Reset");
+            menuTopTen = new JMenuItem("Top ten");
+            menuExit = new JMenuItem("eXit");
+            menuHelp = new JMenu("Help");
+            menuHelpHelp = new JMenuItem("Help");
+            menuAbout = new JMenuItem("About");
+            
+            // Add sub-menus and items
+            menuBar.add(menuGame);
+            menuBar.add(menuHelp);
+            
+            menuGame.add(menuReset);
+            menuGame.add(menuTopTen);
+            menuGame.add(menuExit);
+            
+            menuHelp.add(menuHelpHelp);
+            menuHelp.add(menuAbout);
+            
+            // Add item listeners
+            menuReset.addActionListener(this);
+            menuTopTen.addActionListener(this);
+            menuExit.addActionListener(this);
+            menuHelpHelp.addActionListener(this);
+            menuAbout.addActionListener(this);
+        }
+        
+        public JMenuBar getMenu()
+        {
+            return menuBar;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e)
+        {
+            if(e.getSource() == menuReset)
+            {
+                startNewGame();
+            }
+            else if(e.getSource() == menuTopTen)
+            {
+                
+            }
+            else if(e.getSource() == menuExit)
+            {
+                System.exit(0);
+            }
+            else if(e.getSource() == menuHelpHelp)
+            {
+                
+            }
+            else if(e.getSource() == menuAbout)
+            {
+                
+            }
+        }
+    }
+    
+    
+    
+    private class ButtonSmiley extends JLabel implements MouseListener
+    {
+        public ButtonSmiley()
+        {
+            super(iconOther.SMILE);
+            super.addMouseListener(this);
+        }
+
+        @Override
+        public void mouseClicked(MouseEvent e)
+        {
+            startNewGame();
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e)
+        {
+            super.setIcon(iconOther.SMILE_PRESSED);
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e)
+        {
+            super.setIcon(iconOther.SMILE);
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e)
+        {
+        }
+
         @Override
         public void mouseExited(MouseEvent e)
         {
