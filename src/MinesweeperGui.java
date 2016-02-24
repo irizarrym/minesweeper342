@@ -383,7 +383,7 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
             menuAbout.addActionListener(this);
         
             // Add mnemonics 
-            menuHelp.setMnemonic(KeyEvent.VK_H);
+            menuHelpHelp.setMnemonic(KeyEvent.VK_H);
             menuAbout.setMnemonic(KeyEvent.VK_A);
             menuReset.setMnemonic(KeyEvent.VK_R);
             menuTopTen.setMnemonic(KeyEvent.VK_T);
@@ -412,14 +412,14 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
             }
             else if(e.getSource() == menuHelpHelp)
             {
-                JOptionPane.showMessageDialog(frame.getComponent(0), "Left click to check square for bomb, 
-                right click to mark bomb. Game ends once all are found or bomb explodes.");
+                JOptionPane.showMessageDialog(null, helpMessage,
+                    "How to play Minesweeper", JOptionPane.INFORMATION_MESSAGE);
                 
             }
             else if(e.getSource() == menuAbout)
             {
-             JOptionPane.showMessageDialog(frame.getComponent(0), "Made By Group 60: Michael Irizarry (miriza6@uic.edu)
-                                                                       And Nikhil Shankar (nshank3@uic.edu)");   
+                JOptionPane.showMessageDialog(null, aboutMessage,
+                    "About this game", JOptionPane.INFORMATION_MESSAGE);
             }
         }
     }
@@ -531,4 +531,28 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
         MarkMine        = "M",
         MarkQuestion    = "?";
     }
+    
+    private static final String helpMessage =
+        "You are about to enter No Man's Land.\n" +
+        "There are 10 mines buried in this field.\n" +
+        "Your job is to discover the location of these mines.\n" +
+        "\n" +
+        "How to play:\n" +
+        "Click on a cell to uncover it. This will start the timer.\n" +
+        "You should see a number 1 to 8. This indicates the number of mines surrounding that cell.\n" +
+        "Uncover all 90 cells without mines as fast as possible.\n" +
+        "Right click to mark cells with a flag or question mark.\n" +
+        "A flag indicates you think there is a mine in this cell.\n" +
+        "A question mark indicates you're not sure if there is a mine or not.\n" +
+        "If you click on a mine, it explodes and the game is over.\n" +
+        "Good luck!";
+    
+    private static final String aboutMessage =
+        "University of Illinois at Chicago\n" +
+        "CS 342, Spring 2016\n" +
+        "Project 2: Minesweeper\n" +
+        "\n" +
+        "Group 60:\n" +
+        "Michael Irizarry (miriza6@uic.edu)\n" +
+        "Nikhil Shankar (nshank3@uic.edu)\n";
 }
