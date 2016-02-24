@@ -381,6 +381,13 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
             menuExit.addActionListener(this);
             menuHelpHelp.addActionListener(this);
             menuAbout.addActionListener(this);
+        
+            // Add mnemonics 
+            menuHelp.setMnemonic(KeyEvent.VK_H);
+            menuAbout.setMnemonic(KeyEvent.VK_A);
+            menuReset.setMnemonic(KeyEvent.VK_R);
+            menuTopTen.setMnemonic(KeyEvent.VK_T);
+            menuExit.setMnemonic(KeyEvent.VK_X);
         }
         
         public JMenuBar getMenu()
@@ -405,11 +412,14 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
             }
             else if(e.getSource() == menuHelpHelp)
             {
+                JOptionPane.showMessageDialog(frame.getComponent(0), "Left click to check square for bomb, 
+                right click to mark bomb. Game ends once all are found or bomb explodes.");
                 
             }
             else if(e.getSource() == menuAbout)
             {
-                
+             JOptionPane.showMessageDialog(frame.getComponent(0), "Made By Group 60: Michael Irizarry (miriza6@uic.edu)
+                                                                       And Nikhil Shankar (nshank3@uic.edu)");   
             }
         }
     }
