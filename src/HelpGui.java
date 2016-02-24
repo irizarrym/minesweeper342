@@ -2,10 +2,8 @@
     Group 60:
     Michael Irizarry (miriza6@uic.edu)
     Nikhil Shankar (nshank3@uic.edu)
-
     CS 342 - Project 2
     Minesweeper
-
     GUI for Help >> Help
 */
 
@@ -22,8 +20,9 @@ public class HelpGui extends JFrame
         // Help/About drop down
         setLayout(new GridLayout(1,2));
         JButton Help = new JButton("Help");
+        Help.setMnemonic(KeyEvent.VK_H);
         JButton About = new JButton("About");
-        
+        About.setMnemonic(KeyEvent.VK_A);
         Help.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent arg0) {
