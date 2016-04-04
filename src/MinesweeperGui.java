@@ -12,6 +12,8 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
@@ -105,9 +107,13 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
         game = new MinesweeperGame(this);
         startNewGame();
         
+        // Initialize Top Scores table
+        topTen = new HighScores("minesweeper.dat");
+        
         // Display GUI
-        super.pack();
         super.setResizable(false);
+        super.pack();
+        setLocationRelativeTo(null);    // Center window on screen
         super.setVisible(true);
     }
     
@@ -127,12 +133,6 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
         bombCounter.setValue(10);
     }
     
-    
-    
-    /******************************
-     * iMinesepper Implementation *
-     ******************************/
-    
     // Set cell at (@x, @y) to @state
     @Override
     public void setCell(int x, int y, String state)
@@ -148,21 +148,72 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
     @Override
     public void gameWin()
     {
+        // Prevent calling this function more than once per game
+        if(!gameActive) return;
+        
         gameActive = false;
         timerPanel.stopTimer();
         int time = timerPanel.getValue();
         smiley.setIcon(iconOther.HEAD_GLASSES);
         
-        //@@ Insert code for high score
+        try
+        {
+            if(topTen.isTopTen(time))
+            {
+                String name =
+                    JOptionPane.showInputDialog(null, "Enter your name",
+                    "New Best Time!", JOptionPane.INFORMATION_MESSAGE);
+                
+                if(name != null)
+                    topTen.addScore(name, time);
+                
+                displayTopTen();
+            }
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(MinesweeperGui.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(MinesweeperGui.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     // Player lost the game (clicked on a mine)
     @Override
     public void gameLose()
     {
+        // Prevent calling this function more than once per game
+        if(!gameActive) return;
+        
         gameActive = false;
         timerPanel.stopTimer();
         smiley.setIcon(iconOther.HEAD_DEAD);
+    }
+    
+    
+    
+    /*******************
+     * Private Methods *
+     *******************/
+    
+    // Display top ten scoree
+    private void displayTopTen()
+    {
+        String result = "";
+        
+        result =
+                "There are " +
+                Integer.toString(topTen.count()) +
+                " scores.\n\n";
+        
+        for(int i = 0; i < topTen.count(); ++i)
+        {
+            result += Integer.toString(i + 1) + ".";
+            result += topTen.getName(i);
+            result += " >> " + Integer.toString(topTen.getScore(i));
+            result += "\n";
+        }
+        
+        JOptionPane.showMessageDialog(null, result,
+            "Top Ten Times", JOptionPane.INFORMATION_MESSAGE);
     }
     
     
@@ -241,13 +292,7 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
         @Override
         public void mouseClicked(MouseEvent e)
         {
-            // Player middle clicks on cell (used for debugging purposes)
-            if(e.getButton() == MouseEvent.BUTTON2)
-            {
-                startNewGame();
-            }
-            
-            // Game is not active so do nothing
+            // Game is inactive so do nothing
             if(!gameActive) return;
             
             // Player left clicks on cell
@@ -259,9 +304,10 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
                     return;
                 }
                 
+                // Cell has not been pressed /clicked yet
                 if(state.equals(GuiState.Blank) || state.equals(GuiState.Pressed))
                 {
-                    timerPanel.startTimer();
+                    timerPanel.startTimer();    // Starts timer if not already running
                     game.clickCell(cellX, cellY);
                 }
             }
@@ -347,6 +393,7 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
         private JMenu menuGame;
         private JMenuItem menuReset;
         private JMenuItem menuTopTen;
+        private JMenuItem menuClearScores;
         private JMenuItem menuExit;
         private JMenu menuHelp;
         private JMenuItem menuHelpHelp;
@@ -359,6 +406,7 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
             menuGame = new JMenu("Game");
             menuReset = new JMenuItem("Reset");
             menuTopTen = new JMenuItem("Top ten");
+            menuClearScores = new JMenuItem("Reset Top Ten");
             menuExit = new JMenuItem("eXit");
             menuHelp = new JMenu("Help");
             menuHelpHelp = new JMenuItem("Help");
@@ -370,6 +418,7 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
             
             menuGame.add(menuReset);
             menuGame.add(menuTopTen);
+            menuGame.add(menuClearScores);
             menuGame.add(menuExit);
             
             menuHelp.add(menuHelpHelp);
@@ -378,6 +427,7 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
             // Add item listeners
             menuReset.addActionListener(this);
             menuTopTen.addActionListener(this);
+            menuClearScores.addActionListener(this);
             menuExit.addActionListener(this);
             menuHelpHelp.addActionListener(this);
             menuAbout.addActionListener(this);
@@ -404,7 +454,7 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
             }
             else if(e.getSource() == menuTopTen)
             {
-                
+                displayTopTen();
             }
             else if(e.getSource() == menuExit)
             {
@@ -420,6 +470,18 @@ public class MinesweeperGui extends JFrame implements iMinesweeper
             {
                 JOptionPane.showMessageDialog(null, aboutMessage,
                     "About this game", JOptionPane.INFORMATION_MESSAGE);
+            }
+            else if(e.getSource() == menuClearScores)
+            {
+                try {
+                    topTen.reset();
+                    
+                    JOptionPane.showMessageDialog(null, "Cleared top ten scores",
+                        "Reset Top Ten", JOptionPane.INFORMATION_MESSAGE);
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(null, "Operation failed: " + ex.toString(),
+                        "Reset Top Ten", JOptionPane.ERROR_MESSAGE);
+                }
             }
         }
     }
